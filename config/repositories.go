@@ -32,11 +32,16 @@ func NewSqliteRepository(db *sql.DB) *SqliteRepository {
 
 func (r *SqliteRepository) Migrate() error {
 	query := `
+		CREATE TABLE IF NOT EXISTS artist(
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name VARCHAR(50) NOT NULL
+		);
 		CREATE TABLE IF NOT EXISTS album(
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			title VARCHAR(50) NOT NULL,
-			artist VARCHAR(50) NOT NULL,
-			price DECIMAL(10,2) DEFAULT '0.00'
+			price DECIMAL(10,2) DEFAULT '0.00',
+			artist_id INT, 
+			FOREIGN KEY (artist_id) REFERENCES artist(id)
 		);
 	`
 	_, err := r.db.Exec(query)

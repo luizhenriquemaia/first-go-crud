@@ -2,6 +2,7 @@ package main
 
 import (
 	"app/albums"
+	"app/artists"
 	"app/config"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ func main() {
 
 	router := app.Group("/api/")
 	albums.AlbumRoutes(router)
+	artists.ArtistRoutes(router)
 
 	app.Run("localhost:42069")
 }
