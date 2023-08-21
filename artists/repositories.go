@@ -53,9 +53,9 @@ func (r *SqliteRepository) GetByID(id int64) (*Artist, error) {
 
 func (r *SqliteRepository) Create(artist Artist) (*Artist, error) {
 	res, err := r.db.Exec(`
-		INSERT INTO artist(id, name) 
-		VALUES (?, ?)
-	`, artist.ID, artist.Name)
+		INSERT INTO artist(name) 
+		VALUES (?)
+	`, artist.Name)
 	if err != nil {
 		return nil, err
 	}
