@@ -72,15 +72,21 @@ func (r *SqliteRepository) GetByArtist(artist_id int64) ([]Album, error) {
 func (r *SqliteRepository) Create(album Album) (*Album, error) {
 	res, err := r.db.Exec(`
 			INSERT INTO album(artist_id, title, price)
-			SELECT artist.id, ?, ?
-			FROM artist WHERE EXISTS (
+			SELECT ?, ?, ?
+			WHERE EXISTS (
 				SELECT artist.id FROM artist WHERE artist.id=?
 			);
 		`,
-		album.Title, album.Price, album.Artist,
+		album.Artist, album.Title, album.Price, album.Artist,
 	)
 	if err != nil {
 		return nil, err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	} else if affected == 0 {
+		return nil, config.ErrCreateFailed
 	}
 	id, err := res.LastInsertId()
 	if err != nil {

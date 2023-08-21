@@ -8,6 +8,7 @@ import (
 var (
 	ErrDuplicate    = errors.New("record already exists")
 	ErrNotExists    = errors.New("record doesn't exists")
+	ErrCreateFailed = errors.New("create failed")
 	ErrUpdateFailed = errors.New("update failed")
 	ErrDeleteFailed = errors.New("delete failed")
 )
