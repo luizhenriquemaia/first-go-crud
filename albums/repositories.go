@@ -31,7 +31,7 @@ func (r *SqliteRepository) All() ([]Album, error) {
 	var all []Album
 	for rows.Next() {
 		var album Album
-		if err := rows.Scan(&album.ID, &album.Artist, &album.Title, &album.Price); err != nil {
+		if err := rows.Scan(&album.ID, &album.Title, &album.Price, &album.Artist); err != nil {
 			return nil, err
 		}
 		all = append(all, album)
@@ -42,7 +42,7 @@ func (r *SqliteRepository) All() ([]Album, error) {
 func (r *SqliteRepository) GetByID(id int64) (*Album, error) {
 	row := r.db.QueryRow("SELECT * FROM album WHERE id=?", id)
 	var album Album
-	if err := row.Scan(&album.ID, &album.Artist, &album.Title, &album.Price); err != nil {
+	if err := row.Scan(&album.ID, &album.Title, &album.Price, &album.Artist); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotExists
 		}
@@ -51,8 +51,8 @@ func (r *SqliteRepository) GetByID(id int64) (*Album, error) {
 	return &album, nil
 }
 
-func (r *SqliteRepository) GetByArtist(artist string) ([]Album, error) {
-	rows, err := r.db.Query("SELECT * FROM album WHERE artist=?", artist)
+func (r *SqliteRepository) GetByArtist(artist_id int64) ([]Album, error) {
+	rows, err := r.db.Query("SELECT * FROM album WHERE artist_id=?", artist_id)
 	if err != nil {
 		return nil, err
 	}
@@ -71,10 +71,13 @@ func (r *SqliteRepository) GetByArtist(artist string) ([]Album, error) {
 
 func (r *SqliteRepository) Create(album Album) (*Album, error) {
 	res, err := r.db.Exec(`
-			INSERT INTO album(title, artist, price)
-			VALUES (?, ?, ?)
+			INSERT INTO album(artist_id, title, price)
+			SELECT artist.id, ?, ?
+			FROM artist WHERE EXISTS (
+				SELECT artist.id FROM artist WHERE artist.id=?
+			);
 		`,
-		album.Title, album.Artist, album.Price,
+		album.Title, album.Price, album.Artist,
 	)
 	if err != nil {
 		return nil, err
@@ -92,7 +95,7 @@ func (r *SqliteRepository) Update(id int64, dataUpdate Album) (*Album, error) {
 		return nil, errors.New("invalid updated ID")
 	}
 	res, err := r.db.Exec(
-		"UPDATE album SET title=?, artist=?, price=? WHERE id=?",
+		"UPDATE album SET title=?, artist_id=?, price=? WHERE id=?",
 		dataUpdate.Title, dataUpdate.Artist, dataUpdate.Price, id,
 	)
 	if err != nil {
