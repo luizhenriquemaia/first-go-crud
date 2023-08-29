@@ -44,6 +44,14 @@ func (r *SqliteRepository) Migrate() error {
 			artist_id INT, 
 			FOREIGN KEY (artist_id) REFERENCES artist(id)
 		);
+		CREATE TABLE IF NOT EXISTS track(
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			title VARCHAR(50) NOT NULL,
+			order_number SMALLINT,
+			duration INTEGER,
+			album_id INT,
+			FOREIGN KEY (album_id) REFERENCES album(id)
+		)
 	`
 	_, err := r.db.Exec(query)
 	return err
